@@ -13,10 +13,14 @@ export default function login() {
   const handleGoogleSignIn = async () => {
     try{
       const {createdSessionId, setActive} = await startSSOFlow({strategy:"oauth_google"});
+      console.log("setActive:", setActive);
 
       if(setActive && createdSessionId){
         setActive({session: createdSessionId});
+        console.log("Session set successfully");
+        console.log("Navigating to (tabs)...");
         router.replace('/(tabs)');
+        console.log("Navigation call made");
       }
     }catch(error){
       console.error("OAuth error", error);
@@ -28,14 +32,19 @@ export default function login() {
       {/* Brand Section */}
       <View style={styles.brandSection}>
         <View style={styles.logoContainer}>
-          <Ionicons name="leaf" size={32} Colors={COLORS.primary} />
+          {/* <Ionicons name="leaf" size={32} Colors={COLORS.primary} /> */}
+          <Image
+          style={styles.logoIcon}
+          source={require("../../assets/images/snapzy-logo-icon.png")}
+          resizeMode="cover"
+        />
         </View>
         <Text style={styles.appName}>Snapzy</Text>
-        <Text style={styles.tagline}>don't miss anything</Text>
+        <Text style={styles.tagline}>Snap It, Share It, Love It.</Text>
       </View>
       <View style={styles.illustrationContainer}>
         <Image
-          source={require("../../assets/images/auth-image.png")}
+          source={require("../../assets/images/login-screen-image.png")}
           style={styles.illustration}
           resizeMode="cover"
         />
@@ -51,7 +60,7 @@ export default function login() {
           </View>
           <Text style={styles.googleButtonText}>Continue with Google</Text>
         </TouchableOpacity>
-        <Text style={styles.termsText}>By continuing, you agree to our Terms and Privacy</Text>
+        <Text style={styles.termsText}>Join Snapzy by agreeing to our Terms and Privacy Policy.</Text>
       </View>
     </View>
   );

@@ -16,10 +16,14 @@ export const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 18,
-    backgroundColor: "rgba(74, 222, 128, 0.15)",
+    backgroundColor: COLORS.primary,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 20,
+  },
+  logoIcon: {
+    width: 42,
+    height: 42,
   },
   appName: {
     fontSize: 42,
@@ -42,8 +46,8 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 40,
   },
   illustration: {
-    width: width * 0.75,
-    height: width * 0.75,
+    width: width * 0.60,
+    height: width * 0.60,
     maxHeight: 280,
   },
   loginSection: {
