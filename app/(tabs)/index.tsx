@@ -8,14 +8,20 @@ import { styles } from "@/styles/feed.styles";
 import { useAuth } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "convex/react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  FlatList,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function Index() {
   const { signOut } = useAuth();
 
   const posts = useQuery(api.post.getFeedPosts);
 
-  if(posts === undefined) return <Loader /> 
+  if (posts === undefined) return <Loader />;
 
   // if(posts.length === 0) return <NotPostFound />
 
@@ -29,44 +35,40 @@ export default function Index() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView 
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={{paddingBottom: 60}}
-      >
-        {/* STORIES */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.storiesContainer}
-        >
-          {STORIES.map((story) => (
-            <Story key={story.id} story={story} />
-          ))}
-        </ScrollView>
-
-          {
-            posts.map((post) => (
-              <Post key={post._id} post={post} />
-            ))
-          }
-
-      </ScrollView>
+      <FlatList
+        data={posts}
+        renderItem={({ item }) => <Post post={item} />}
+        keyExtractor={(item) => item._id}
+        showsVerticalScrollIndicator={false}
+      />
     </View>
   );
 }
 
+const StoriesSection = () => {
+  return (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      style={styles.storiesContainer}
+    >
+      {STORIES.map((story) => (
+        <Story key={story.id} story={story} />
+      ))}
+    </ScrollView>
+  );
+};
+
 
 const NotPostFound = () => (
   <View
-  style={{
-    flex: 1,
-    backgroundColor: COLORS.background,
-    justifyContent: "center",
-    alignItems: "center",
-  }}
+    style={{
+      flex: 1,
+      backgroundColor: COLORS.background,
+      justifyContent: "center",
+      alignItems: "center",
+    }}
   >
-    <Text style={{fontSize: 20, color: COLORS.primary}}>No post yet</Text>
+    <Text style={{ fontSize: 20, color: COLORS.primary }}>No post yet</Text>
   </View>
 );
-
-

@@ -108,7 +108,7 @@ export default function Post({ post }: PostProps) {
         {post.caption && (
           <View style={styles.captionContainer}>
             <Text style={styles.captionUsername}>{post.author.username}</Text>
-            <Text style={styles.captionText}>{post.author.username}</Text>
+            <Text style={styles.captionText}>{post.caption}</Text>
           </View>
         )}
         <TouchableOpacity>
