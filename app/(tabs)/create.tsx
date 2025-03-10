@@ -84,6 +84,9 @@ export default function CreateScreen() {
       
       await createPost({storageId, caption});
 
+      setSelectedImage(null);
+      setCaption("");
+
       router.push("/(tabs)");
 
     }catch(error){
