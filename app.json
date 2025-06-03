@@ -15,7 +15,7 @@
       "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#161616"
       }
     },
     "web": {
@@ -31,12 +31,13 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#0C0C0C"
         }
       ]
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "sdkVersion": "53.0.0"
   }
 }

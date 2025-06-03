@@ -32,7 +32,7 @@ export default function TabLayout() {
         name="bookmarks"
         options={{
           tabBarIcon: ({ size, color }) => (
-            <Ionicons name="bookmark" size={size} color={color} />
+            <Ionicons name="bookmarks-sharp" size={22} color={color} />
           ),
         }}
       />
@@ -40,7 +40,7 @@ export default function TabLayout() {
         name="create"
         options={{
           tabBarIcon: ({ size, color }) => (
-            <Ionicons name="add-circle" size={size} color={COLORS.primary} />
+            <Ionicons name="camera-sharp" size={28} color={COLORS.primary} />
           ),
         }}
       />
@@ -48,7 +48,7 @@ export default function TabLayout() {
         name="notifications"
         options={{
           tabBarIcon: ({ size, color }) => (
-            <Ionicons name="heart" size={size} color={color} />
+            <Ionicons name="notifications" size={size} color={color} />
           ),
         }}
       />

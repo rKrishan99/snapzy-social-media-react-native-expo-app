@@ -57,38 +57,55 @@ export default function CreateScreen() {
   const generateUploadUrl = useMutation(api.post.generateUploadUrl);
   const createPost = useMutation(api.post.createPost);
 
-  const handdleShare =async () => {
-    if(!selectedImage) return;
+  const handdleShare = async () => {
+    if (!selectedImage) return;
 
-    try{
+    try {
       setSharing(true);
       console.log("Started sharing process...");
 
       const uploadUrl = await generateUploadUrl();
-      console.log("uploadUrl:",uploadUrl);
+      console.log("uploadUrl:", uploadUrl);
 
-      const uploadResult = await FileSystem.uploadAsync(uploadUrl,
-        selectedImage, {
-          httpMethod: "POST",
-          uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
-          mimeType: "image/jpeg"
-        }
-      );
-      console.log("uploadResult:",uploadResult);
+      let storageId;
 
-      if(uploadResult.status !== 200) throw new Error("Upload Failed");
+      if (Platform.OS === "web") {
+        // Web: fetch the image as a blob and upload with fetch
+        const response = await fetch(selectedImage);
+        const blob = await response.blob();
+        const uploadResponse = await fetch(uploadUrl, {
+          method: "POST",
+          body: blob,
+          headers: { "Content-Type": "image/jpeg" },
+        });
+        if (!uploadResponse.ok) throw new Error("Upload failed");
+        const uploadResult = await uploadResponse.json();
+        storageId = uploadResult.storageId;
+        console.log("storageId:", storageId);
+      } else {
+        // Native: use FileSystem.uploadAsync
+        const uploadResult = await FileSystem.uploadAsync(
+          uploadUrl,
+          selectedImage,
+          {
+            httpMethod: "POST",
+            uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
+            mimeType: "image/jpeg",
+          }
+        );
+        console.log("uploadResult:", uploadResult);
+        if (uploadResult.status !== 200) throw new Error("Upload Failed");
+        storageId = JSON.parse(uploadResult.body).storageId;
+        console.log("storageId:", storageId);
+      }
 
-      const { storageId } = JSON.parse(uploadResult.body);
-      console.log("storageId:",storageId);
-
-      
-      await createPost({storageId, caption});
-
+      await createPost({ storageId, caption });
+      setSelectedImage(null);
+      setCaption("");
       router.push("/(tabs)");
-
-    }catch(error){
-      console.log("Error sharing post");
-    }finally{
+    } catch (error) {
+      console.error("Error sharing post", error);
+    } finally {
       setSharing(false);
     }
   };

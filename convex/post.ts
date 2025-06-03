@@ -1,6 +1,7 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { mutation, MutationCtx, query } from "./_generated/server";
 import { getAuthenticatedUser } from "./users";
+import { Id } from "./_generated/dataModel";
 
 export const generateUploadUrl = mutation(async (ctx) => {
   const identify = await ctx.auth.getUserIdentity();
@@ -41,9 +42,15 @@ export const createPost = mutation({
 
 export const getFeedPosts = query({
   handler: async (ctx) => {
-    const currentUser = await getAuthenticatedUser(ctx);
+    let currentUser;
+    try {
+      currentUser = await getAuthenticatedUser(ctx);
+    } catch (e) {
+      // User not found, return null so frontend can handle
+      return null;
+    }
 
-    //get all posts
+    // get all posts
     const posts = await ctx.db.query("posts").order("desc").collect();
 
     if (posts.length === 0) return [];
@@ -124,3 +131,91 @@ export const toggleLike = mutation({
     }
   },
 });
+
+export const deletePost = mutation({
+  args: { postId: v.id("posts") },
+  handler: async (ctx, args) => {
+    const currentUser = await getAuthenticatedUser(ctx);
+
+    const post = await ctx.db.get(args.postId);
+
+    if (!post) throw new Error("Post not found");
+
+    //verify owner
+    if (post.userId !== currentUser._id)
+      throw new Error("Not authorized to delete this post");
+
+    //delete likes
+    const likes = await ctx.db
+      .query("likes")
+      .withIndex("by_post", (q) => q.eq("postId", args.postId))
+      .collect();
+
+    for (const like of likes) {
+      await ctx.db.delete(like._id);
+    }
+
+    //delete comments
+    const comments = await ctx.db
+      .query("comments")
+      .withIndex("by_post", (q) => q.eq("postId", args.postId))
+      .collect();
+
+    for (const comment of comments) {
+      await ctx.db.delete(comment._id);
+    }
+
+    //delete bookmarks
+    const bookmarks = await ctx.db
+      .query("bookmarks")
+      .withIndex("by_post", (q) => q.eq("postId", args.postId))
+      .collect();
+
+    for (const bookmark of bookmarks) {
+      await ctx.db.delete(bookmark._id);
+    }
+
+    //delete notification
+    const notifications = await ctx.db
+      .query("notifications")
+      .withIndex("by_post", (q) => q.eq("postId", args.postId))
+      .collect();
+
+    for (const notification of notifications) {
+      await ctx.db.delete(notification._id);
+    }
+
+    // delete the storage file
+    await ctx.storage.delete(post.storageId);
+
+    // delete post
+    await ctx.db.delete(args.postId);
+
+    // decreament user's post count by 1
+    await ctx.db.patch(currentUser._id, {
+      post: Math.max(0, (currentUser.post || 1) - 1),
+    });
+  },
+});
+
+export const getPostByUser = query({
+  args: {
+    userId: v.optional(v.id("users")),
+  },
+  handler: async (ctx, args) => {
+    const user = args.userId
+      ? await ctx.db.get(args.userId)
+      : await getAuthenticatedUser(ctx);
+
+    if (!user) throw new Error("User not found");
+
+    const posts = await ctx.db
+      .query("posts")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId || user._id))
+      .collect();
+
+    return posts;
+  },
+});
+
+
