@@ -7,7 +7,7 @@ export const getNotifications = query({
         const currentUser = await getAuthenticatedUser(ctx);
 
         const notifications = await ctx.db.query("notifications")
-        .withIndex("by_receiver", (q) => q.eq("reciverId", currentUser._id))
+        .withIndex("by_receiver", (q) => q.eq("reciverId", currentUser._id)) // Fixed: use "reciverId" to match schema
         .order("desc")
         .collect()
 

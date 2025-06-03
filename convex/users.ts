@@ -64,14 +64,41 @@ export async function getAuthenticatedUser(ctx: QueryCtx | MutationCtx) {
   const identify = await ctx.auth.getUserIdentity();
   if (!identify) throw new Error("Unauthorized");
 
-  const currentUser = await ctx.db
+  let currentUser = await ctx.db
     .query("users")
-    .withIndex("by_clerk_id", (q) => q.eq("clerkId", identify.subject))
+    .withIndex("by_clerk_id", (q: any) => q.eq("clerkId", identify.subject))
     .first();
 
-  if (!currentUser) throw new Error("Use not found");
+  // If in a mutation, create the user if not found
+  if (!currentUser && isMutationCtx(ctx)) {
+    currentUser = await createUserInMutation(ctx as MutationCtx, identify);
+  }
+
+  if (!currentUser) throw new Error("User not found after creation");
 
   return currentUser;
+}
+
+// Helper to check if ctx is a MutationCtx
+function isMutationCtx(ctx: QueryCtx | MutationCtx): ctx is MutationCtx {
+  // MutationCtx has .db.insert, QueryCtx does not
+  return typeof (ctx as MutationCtx).db.insert === "function";
+}
+
+// Helper to create user in mutation
+async function createUserInMutation(ctx: MutationCtx, identify: any) {
+  const newUserId = await ctx.db.insert("users", {
+    clerkId: identify.subject,
+    username: identify.username || identify.email || "user",
+    image: identify.pictureUrl || "",
+    fullname: identify.name || "",
+    bio: "",
+    post: 0,
+    followers: 0,
+    following: 0,
+    email: identify.email || "",
+  });
+  return await ctx.db.get(newUserId);
 }
 
 export const isFollowing = query({
@@ -142,13 +169,13 @@ async function updateFollowCounts(
   isFollow: boolean
 ) {
   const follower = await ctx.db.get(followerId);
-  const following = await ctx.db.get(followerId);
+  const following = await ctx.db.get(followingId);
 
   if (follower && following) {
     await ctx.db.patch(followerId, {
       following: follower.following + (isFollow ? 1 : -1),
     });
-    await ctx.db.patch(followerId, {
+    await ctx.db.patch(followingId, {
       followers: following.followers + (isFollow ? 1 : -1),
     });
   }

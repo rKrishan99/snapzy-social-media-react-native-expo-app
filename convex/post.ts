@@ -42,9 +42,15 @@ export const createPost = mutation({
 
 export const getFeedPosts = query({
   handler: async (ctx) => {
-    const currentUser = await getAuthenticatedUser(ctx);
+    let currentUser;
+    try {
+      currentUser = await getAuthenticatedUser(ctx);
+    } catch (e) {
+      // User not found, return null so frontend can handle
+      return null;
+    }
 
-    //get all posts
+    // get all posts
     const posts = await ctx.db.query("posts").order("desc").collect();
 
     if (posts.length === 0) return [];
