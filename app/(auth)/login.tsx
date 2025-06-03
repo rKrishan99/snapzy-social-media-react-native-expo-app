@@ -6,23 +6,17 @@ import { useRouter } from "expo-router";
 import { View, Text, Image, TouchableOpacity } from "react-native";
 
 export default function login() {
-
-  const {startSSOFlow} =useSSO();
+  const { startSSOFlow } = useSSO(); // <-- FIXED: destructure startSSOFlow
   const router = useRouter();
 
   const handleGoogleSignIn = async () => {
-    try{
-      const {createdSessionId, setActive} = await startSSOFlow({strategy:"oauth_google"});
-      console.log("setActive:", setActive);
-
-      if(setActive && createdSessionId){
-        setActive({session: createdSessionId});
-        console.log("Session set successfully");
-        console.log("Navigating to (tabs)...");
+    try {
+      const { createdSessionId, setActive } = await startSSOFlow({ strategy: "oauth_google" });
+      if (setActive && createdSessionId) {
+        await setActive({ session: createdSessionId });
         router.replace('/(tabs)');
-        console.log("Navigation call made");
       }
-    }catch(error){
+    } catch (error) {
       console.error("OAuth error", error);
     }
   }

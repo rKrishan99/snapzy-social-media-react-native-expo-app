@@ -37,6 +37,7 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "sdkVersion": "53.0.0"
   }
 }
