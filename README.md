@@ -11,7 +11,7 @@ Snapzy is a modern mobile photo sharing app built with [Expo](https://expo.dev),
 - 🔒 Secure authentication with Clerk
 - ☁️ Real-time backend with Convex
   
-![Bandmate – Connect Musicians   Bands (6)](https://github.com/user-attachments/assets/134a9ed7-c894-4a46-99f2-c02d195a3465)
+![SnapzyAppImg](https://github.com/user-attachments/assets/a240c986-0973-4289-a301-945a718cec90)
 
 
 ## 🛠️ Getting Started
